@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Agregar el directorio app al path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
 
 from app import create_app
@@ -15,11 +14,9 @@ def init_database():
         try:
             print("🔄 Inicializando base de datos...")
             
-            # Crear todas las tablas
             db.create_all()
             print("✅ Tablas creadas exitosamente")
             
-            # Verificar y crear usuario admin
             admin = Usuario.query.filter_by(username='admin').first()
             if not admin:
                 admin_user = Usuario(
@@ -33,7 +30,6 @@ def init_database():
             else:
                 print("⚠️  Usuario admin ya existe")
             
-            # Crear municipios de ejemplo si no existen
             if Municipio.query.count() == 0:
                 municipios = [
                     Municipio(nombre='Aguascalientes', codigo='AGS'),

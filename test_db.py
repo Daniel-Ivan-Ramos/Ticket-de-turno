@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Agregar el directorio app al path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
 
 from app import create_app
@@ -14,11 +13,9 @@ def test_database():
         try:
             print("🧪 Probando conexión a la base de datos...")
             
-            # Test de conexión básica
             db.engine.connect()
             print("✅ Conexión a MySQL exitosa")
             
-            # Contar registros
             usuarios_count = Usuario.query.count()
             municipios_count = Municipio.query.count()
             tickets_count = Ticket.query.count()
@@ -28,7 +25,6 @@ def test_database():
             print(f"   🏙️  Municipios: {municipios_count}")
             print(f"   🎫 Tickets: {tickets_count}")
             
-            # Mostrar municipios
             municipios = Municipio.query.all()
             print(f"\n🏘️  Municipios disponibles:")
             for mun in municipios:

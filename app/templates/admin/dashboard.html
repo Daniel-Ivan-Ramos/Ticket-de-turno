@@ -12,7 +12,6 @@
     </div>
 </div>
 
-<!-- Estadísticas Rápidas -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card text-white bg-primary">
@@ -82,7 +81,6 @@
     </div>
 </div>
 
-<!-- Gráficas Principales -->
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
@@ -110,7 +108,6 @@
     </div>
 </div>
 
-<!-- Gráficas por Municipio -->
 <div class="row">
     <div class="col-md-6">
         <div class="card">
@@ -138,7 +135,6 @@
     </div>
 </div>
 
-<!-- Tabla de Estadísticas por Municipio -->
 {% if municipios_stats %}
 <div class="row mt-4">
     <div class="col-12">
@@ -191,11 +187,9 @@
 </div>
 {% endif %}
 
-<!-- Scripts para Gráficas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Colores para las gráficas
     const colors = {
         primary: '#007bff',
         success: '#28a745',
@@ -205,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function() {
         secondary: '#6c757d'
     };
 
-    // Gráfica de Distribución por Estatus (Pie Chart)
     const estatusCtx = document.getElementById('estatusChart').getContext('2d');
     new Chart(estatusCtx, {
         type: 'doughnut',
@@ -239,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Gráfica de Actividad Reciente (Line Chart)
     const actividadCtx = document.getElementById('actividadChart').getContext('2d');
     new Chart(actividadCtx, {
         type: 'line',
@@ -268,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Gráfica de Tickets por Municipio (Bar Chart)
     const municipiosCtx = document.getElementById('municipiosChart').getContext('2d');
     new Chart(municipiosCtx, {
         type: 'bar',
@@ -295,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Gráfica de Detalle por Municipio (Stacked Bar Chart)
     const municipiosDetalleCtx = document.getElementById('municipiosDetalleChart').getContext('2d');
     new Chart(municipiosDetalleCtx, {
         type: 'bar',
@@ -337,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Acciones Rápidas -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">

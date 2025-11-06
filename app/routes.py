@@ -24,16 +24,13 @@ def solicitar_turno():
         email = request.form.get('email')
         municipio_id = request.form.get('municipio_id')
         
-        # Verificar si ya existe un turno para esta CURP en el municipio
         ticket_existente = turno_manager.validar_turno_existente(municipio_id, curp)
         if ticket_existente:
             flash('Ya existe un turno para esta CURP en el municipio seleccionado', 'warning')
             return redirect(url_for('main.modificar_turno'))
         
-        # Obtener siguiente turno
         numero_turno = turno_manager.obtener_siguiente_turno(municipio_id)
         
-        # Crear nuevo ticket
         nuevo_ticket = Ticket(
             curp=curp,
             nombre=nombre,
@@ -100,7 +97,6 @@ def descargar_comprobante(ticket_id):
         mimetype='application/pdf'
     )
 
-# Panel de Administración
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
@@ -108,12 +104,10 @@ def dashboard():
         flash('No tienes permisos para acceder a esta página', 'error')
         return redirect(url_for('main.index'))
     
-    # Estadísticas básicas
     total_tickets = Ticket.query.count()
     tickets_pendientes = Ticket.query.filter_by(estatus='Pendiente').count()
     tickets_resueltos = Ticket.query.filter_by(estatus='Resuelto').count()
     
-    # Estadísticas por municipio
     municipios_stats = db.session.query(
         Municipio.nombre,
         db.func.count(Ticket.id).label('total_tickets'),
@@ -123,7 +117,6 @@ def dashboard():
      .group_by(Municipio.id, Municipio.nombre)\
      .all()
     
-    # Estadísticas por fecha (últimos 7 días)
     from datetime import datetime, timedelta
     fecha_limite = datetime.utcnow() - timedelta(days=7)
     
@@ -135,7 +128,6 @@ def dashboard():
      .order_by(db.func.date(Ticket.fecha_creacion))\
      .all()
     
-    # Preparar datos para las gráficas
     municipios_nombres = [stat.nombre for stat in municipios_stats]
     municipios_totales = [stat.total_tickets for stat in municipios_stats]
     municipios_pendientes = [stat.pendientes for stat in municipios_stats]
@@ -202,7 +194,6 @@ def cambiar_estatus(ticket_id):
     
     return jsonify({'nuevo_estatus': ticket.estatus})
 
-# CRUD COMPLETO PARA TICKETS - ADMIN
 @main_bp.route('/admin/tickets/crear', methods=['GET', 'POST'])
 @login_required
 def crear_ticket_admin():
@@ -223,16 +214,13 @@ def crear_ticket_admin():
             municipio_id = request.form.get('municipio_id')
             estatus = request.form.get('estatus', 'Pendiente')
             
-            # Verificar si ya existe un turno para esta CURP en el municipio
             ticket_existente = turno_manager.validar_turno_existente(municipio_id, curp)
             if ticket_existente:
                 flash('Ya existe un turno para esta CURP en el municipio seleccionado', 'warning')
                 return redirect(url_for('main.crear_ticket_admin'))
             
-            # Obtener siguiente turno
             numero_turno = turno_manager.obtener_siguiente_turno(municipio_id)
             
-            # Crear nuevo ticket
             nuevo_ticket = Ticket(
                 curp=curp,
                 nombre=nombre,
@@ -287,7 +275,6 @@ def editar_ticket(ticket_id):
     
     return render_template('admin/editar_ticket.html', ticket=ticket, municipios=municipios)
 
-# CRUD COMPLETO PARA MUNICIPIOS
 @main_bp.route('/admin/municipios')
 @login_required
 def administrar_municipios():
@@ -310,7 +297,6 @@ def crear_municipio():
             nombre = request.form.get('nombre')
             codigo = request.form.get('codigo')
             
-            # Validar que no exista el municipio
             municipio_existente = Municipio.query.filter(
                 (Municipio.nombre == nombre) | (Municipio.codigo == codigo)
             ).first()
@@ -351,7 +337,6 @@ def editar_municipio(municipio_id):
             codigo = request.form.get('codigo')
             activo = request.form.get('activo') == 'on'
             
-            # Validar que no exista otro municipio con el mismo nombre o código
             municipio_existente = Municipio.query.filter(
                 (Municipio.nombre == nombre) | (Municipio.codigo == codigo)
             ).filter(Municipio.id != municipio_id).first()
@@ -383,7 +368,6 @@ def eliminar_municipio(municipio_id):
     try:
         municipio = Municipio.query.get_or_404(municipio_id)
         
-        # Verificar si hay tickets asociados
         if municipio.tickets:
             return jsonify({
                 'error': 'No se puede eliminar el municipio porque tiene tickets asociados'

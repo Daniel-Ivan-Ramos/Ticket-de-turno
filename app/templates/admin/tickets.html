@@ -8,7 +8,6 @@
     </a>
 </div>
 
-<!-- Barra de Búsqueda -->
 <div class="card mb-4">
     <div class="card-body">
         <form method="GET" action="{{ url_for('main.administrar_tickets') }}">
@@ -27,7 +26,6 @@
     </div>
 </div>
 
-<!-- Estadísticas Rápidas -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card text-white bg-primary">
@@ -91,7 +89,6 @@
     </div>
 </div>
 
-<!-- Tabla de Tickets -->
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">
@@ -203,7 +200,6 @@
     </div>
 </div>
 
-<!-- Información de Acciones -->
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="card">
@@ -242,7 +238,6 @@
     </div>
 </div>
 
-<!-- Scripts para acciones -->
 <script>
 function cambiarEstatus(ticketId) {
     if (confirm('¿Estás seguro de cambiar el estatus de este ticket?')) {
@@ -261,9 +256,7 @@ function cambiarEstatus(ticketId) {
         })
         .then(data => {
             if (data.nuevo_estatus) {
-                // Mostrar mensaje de éxito
                 showAlert(`Estatus cambiado a: ${data.nuevo_estatus}`, 'success');
-                // Recargar después de 1 segundo
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
@@ -289,7 +282,6 @@ function eliminarTicket(ticketId) {
         .then(response => {
             if (response.ok) {
                 showAlert('Ticket eliminado exitosamente', 'success');
-                // Recargar después de 1 segundo
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
@@ -307,7 +299,6 @@ function eliminarTicket(ticketId) {
 }
 
 function showAlert(message, type) {
-    // Crear alerta temporal
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
     alertDiv.innerHTML = `
@@ -315,11 +306,9 @@ function showAlert(message, type) {
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
-    // Insertar al inicio del container
     const container = document.querySelector('.container.mt-4');
     container.insertBefore(alertDiv, container.firstChild);
     
-    // Auto-remover después de 5 segundos
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.remove();
@@ -327,7 +316,6 @@ function showAlert(message, type) {
     }, 5000);
 }
 
-// Mejorar la experiencia de búsqueda
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.querySelector('input[name="q"]');
     if (searchInput && searchInput.value) {

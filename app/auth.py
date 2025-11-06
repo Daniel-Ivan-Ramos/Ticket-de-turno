@@ -14,12 +14,10 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Validar campos vacíos
         if not username or not password:
             flash('Por favor ingrese usuario y contraseña', 'error')
             return render_template('auth/login.html')
         
-        # Buscar usuario
         usuario = Usuario.query.filter_by(username=username, activo=True).first()
         
         if usuario and check_password_hash(usuario.password, password):

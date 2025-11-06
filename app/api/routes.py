@@ -34,7 +34,6 @@ def crear_ticket():
     data = request.get_json()
     
     try:
-        # Validar existencia previa
         if turno_manager.validar_turno_existente(data['municipio_id'], data['curp']):
             return jsonify({'error': 'Ya existe un turno para esta CURP en el municipio'}), 400
         

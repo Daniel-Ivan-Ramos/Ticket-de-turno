@@ -12,12 +12,10 @@ class PDFGenerator:
         c = canvas.Canvas(buffer, pagesize=letter)
         width, height = letter
         
-        # Encabezado
         c.setFont("Helvetica-Bold", 16)
         c.drawString(100, height - 100, "COMPROBANTE DE TURNO")
         c.line(100, height - 105, 500, height - 105)
         
-        # Información del ticket
         c.setFont("Helvetica", 12)
         y = height - 150
         c.drawString(100, y, f"Nombre: {ticket.nombre} {ticket.apellido_paterno} {ticket.apellido_materno}")
@@ -32,7 +30,6 @@ class PDFGenerator:
         y -= 25
         c.drawString(100, y, f"Estatus: {ticket.estatus}")
         
-        # Código QR
         qr_data = ticket.generar_qr_base64()
         qr_image = ImageReader(BytesIO(base64.b64decode(qr_data)))
         c.drawImage(qr_image, 400, height - 300, width=100, height=100)
