@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> Editar Ticket</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CURP</label>
+                            <input type="text" class="form-control" value="{{ ticket.curp }}" readonly>
+                            <small class="form-text text-muted">La CURP no se puede modificar</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Número de Turno</label>
+                            <input type="text" class="form-control" value="{{ ticket.numero_turno }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="nombre" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   value="{{ ticket.nombre }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="apellido_paterno" class="form-label">Apellido Paterno *</label>
+                            <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno" 
+                                   value="{{ ticket.apellido_paterno }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="apellido_materno" class="form-label">Apellido Materno *</label>
+                            <input type="text" class="form-control" id="apellido_materno" name="apellido_materno" 
+                                   value="{{ ticket.apellido_materno }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                   value="{{ ticket.telefono }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ ticket.email }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="municipio_id" class="form-label">Municipio *</label>
+                            <select class="form-select" id="municipio_id" name="municipio_id" required>
+                                {% for municipio in municipios %}
+                                    <option value="{{ municipio.id }}" 
+                                            {% if municipio.id == ticket.municipio_id %}selected{% endif %}>
+                                        {{ municipio.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="estatus" class="form-label">Estatus</label>
+                            <select class="form-select" id="estatus" name="estatus">
+                                <option value="Pendiente" {% if ticket.estatus == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="Resuelto" {% if ticket.estatus == 'Resuelto' %}selected{% endif %}>Resuelto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('main.administrar_tickets') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Actualizar Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-city"></i> Gestión de Municipios</h1>
+    <a href="{{ url_for('main.crear_municipio') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nuevo Municipio
+    </a>
+</div>
+
+<!-- Lista de Municipios -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list"></i> Municipios Registrados ({{ municipios|length }})
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if municipios %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Código</th>
+                        <th>Estado</th>
+                        <th>Tickets</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for municipio in municipios %}
+                    <tr>
+                        <td>{{ municipio.id }}</td>
+                        <td>{{ municipio.nombre }}</td>
+                        <td><code>{{ municipio.codigo }}</code></td>
+                        <td>
+                            {% if municipio.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ municipio.tickets|length }}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('main.editar_municipio', municipio_id=municipio.id) }}" 
+                                   class="btn btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-outline-danger" 
+                                        onclick="eliminarMunicipio({{ municipio.id }})"
+                                        title="Eliminar"
+                                        {% if municipio.tickets %}disabled{% endif %}>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-city fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hay municipios registrados</h5>
+            <a href="{{ url_for('main.crear_municipio') }}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Crear Primer Municipio
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function eliminarMunicipio(municipioId) {
+    if (confirm('¿Estás seguro de eliminar este municipio? Esta acción no se puede deshacer.')) {
+        fetch(`/admin/municipios/${municipioId}/eliminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Error al eliminar el municipio');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el municipio');
+        });
+    }
+}
+</script>
+{% endblock %}

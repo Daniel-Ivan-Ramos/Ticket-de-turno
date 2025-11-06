@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> Modificar Turno Existente</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.modificar_turno') }}">
+                    <div class="mb-3">
+                        <label for="curp" class="form-label">CURP *</label>
+                        <input type="text" class="form-control" id="curp" name="curp" required 
+                               pattern="[A-Z]{4}[0-9]{6}[A-Z]{6}[0-9A-Z]{2}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="numero_turno" class="form-label">Número de Turno *</label>
+                        <input type="number" class="form-control" id="numero_turno" name="numero_turno" required min="1">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-search"></i> Buscar Turno
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

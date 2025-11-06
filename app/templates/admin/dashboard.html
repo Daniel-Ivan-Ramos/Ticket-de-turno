@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('main.administrar_tickets') }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-list"></i> Ver Todos los Tickets
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_tickets }}</h4>
+                        <p class="card-text">Total de Tickets</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ pendientes }}</h4>
+                        <p class="card-text">Pendientes</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ resueltos }}</h4>
+                        <p class="card-text">Resueltos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">
+                            {% if total_tickets > 0 %}
+                                {{ ((resueltos / total_tickets) * 100)|round(1) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </h4>
+                        <p class="card-text">Tasa de Resolución</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficas Principales -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie"></i> Distribución por Estatus
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="estatusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar"></i> Actividad Reciente (Últimos 7 días)
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="actividadChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficas por Municipio -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-city"></i> Tickets por Municipio
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="municipiosChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar"></i> Detalle por Municipio
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="municipiosDetalleChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Estadísticas por Municipio -->
+{% if municipios_stats %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table"></i> Estadísticas Detalladas por Municipio
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Total Tickets</th>
+                                <th>Pendientes</th>
+                                <th>Resueltos</th>
+                                <th>Tasa de Resolución</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in municipios_stats %}
+                            <tr>
+                                <td>{{ stat.nombre }}</td>
+                                <td>{{ stat.total_tickets }}</td>
+                                <td>
+                                    <span class="badge bg-warning">{{ stat.pendientes }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ stat.resueltos }}</span>
+                                </td>
+                                <td>
+                                    {% if stat.total_tickets > 0 %}
+                                        <span class="badge bg-info">
+                                            {{ ((stat.resueltos / stat.total_tickets) * 100)|round(1) }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">0%</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Scripts para Gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Colores para las gráficas
+    const colors = {
+        primary: '#007bff',
+        success: '#28a745',
+        warning: '#ffc107',
+        danger: '#dc3545',
+        info: '#17a2b8',
+        secondary: '#6c757d'
+    };
+
+    // Gráfica de Distribución por Estatus (Pie Chart)
+    const estatusCtx = document.getElementById('estatusChart').getContext('2d');
+    new Chart(estatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pendientes', 'Resueltos'],
+            datasets: [{
+                data: [{{ pendientes }}, {{ resueltos }}],
+                backgroundColor: [colors.warning, colors.success],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = {{ total_tickets }};
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfica de Actividad Reciente (Line Chart)
+    const actividadCtx = document.getElementById('actividadChart').getContext('2d');
+    new Chart(actividadCtx, {
+        type: 'line',
+        data: {
+            labels: {{ fechas | tojson }},
+            datasets: [{
+                label: 'Tickets por Día',
+                data: {{ tickets_por_dia | tojson }},
+                borderColor: colors.primary,
+                backgroundColor: colors.primary + '20',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfica de Tickets por Municipio (Bar Chart)
+    const municipiosCtx = document.getElementById('municipiosChart').getContext('2d');
+    new Chart(municipiosCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ municipios_nombres | tojson }},
+            datasets: [{
+                label: 'Total de Tickets',
+                data: {{ municipios_totales | tojson }},
+                backgroundColor: colors.primary,
+                borderColor: colors.primary,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfica de Detalle por Municipio (Stacked Bar Chart)
+    const municipiosDetalleCtx = document.getElementById('municipiosDetalleChart').getContext('2d');
+    new Chart(municipiosDetalleCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ municipios_nombres | tojson }},
+            datasets: [
+                {
+                    label: 'Pendientes',
+                    data: {{ municipios_pendientes | tojson }},
+                    backgroundColor: colors.warning,
+                    borderColor: colors.warning,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Resueltos',
+                    data: {{ municipios_resueltos | tojson }},
+                    backgroundColor: colors.success,
+                    borderColor: colors.success,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<!-- Acciones Rápidas -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt"></i> Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.administrar_tickets') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-list"></i><br>
+                            Gestionar Tickets
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.administrar_municipios') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-city"></i><br>
+                            Municipios
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.crear_ticket_admin') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-plus"></i><br>
+                            Nuevo Ticket
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-sign-out-alt"></i><br>
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    margin-bottom: 1rem;
+}
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}

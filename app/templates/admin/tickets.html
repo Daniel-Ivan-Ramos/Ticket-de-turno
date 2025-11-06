@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-list"></i> Gestión de Tickets</h1>
+    <a href="{{ url_for('main.crear_ticket_admin') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nuevo Ticket
+    </a>
+</div>
+
+<!-- Barra de Búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('main.administrar_tickets') }}">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" 
+                           placeholder="Buscar por CURP, nombre o apellido paterno...">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">{{ tickets|length }}</h5>
+                        <small>Total Encontrados</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">{{ tickets|selectattr('estatus', 'equalto', 'Pendiente')|list|length }}</h5>
+                        <small>Pendientes</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">{{ tickets|selectattr('estatus', 'equalto', 'Resuelto')|list|length }}</h5>
+                        <small>Resueltos</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">{{ tickets|selectattr('fecha_creacion')|list|length }}</h5>
+                        <small>Con Fecha</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Tickets -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-table"></i> Lista de Tickets ({{ tickets|length }} resultados)
+        </h5>
+        <div>
+            <a href="{{ url_for('main.administrar_tickets') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-refresh"></i> Actualizar
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if tickets %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>CURP</th>
+                        <th>Nombre Completo</th>
+                        <th>Municipio</th>
+                        <th>Turno</th>
+                        <th>Estatus</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td><strong>#{{ ticket.id }}</strong></td>
+                        <td>
+                            <code class="bg-light p-1 rounded">{{ ticket.curp }}</code>
+                        </td>
+                        <td>
+                            <strong>{{ ticket.nombre }} {{ ticket.apellido_paterno }} {{ ticket.apellido_materno }}</strong>
+                            <br>
+                            <small class="text-muted">{{ ticket.email }}</small>
+                            <br>
+                            <small class="text-muted">{{ ticket.telefono }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ ticket.municipio.nombre }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary fs-6">#{{ ticket.numero_turno }}</span>
+                        </td>
+                        <td>
+                            <span class="badge {% if ticket.estatus == 'Pendiente' %}bg-warning{% else %}bg-success{% endif %} fs-6">
+                                {% if ticket.estatus == 'Pendiente' %}
+                                    <i class="fas fa-clock"></i>
+                                {% else %}
+                                    <i class="fas fa-check"></i>
+                                {% endif %}
+                                {{ ticket.estatus }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>
+                                {{ ticket.fecha_creacion.strftime('%d/%m/%Y') }}<br>
+                                {{ ticket.fecha_creacion.strftime('%H:%M') }}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('main.editar_ticket', ticket_id=ticket.id) }}" 
+                                   class="btn btn-outline-warning" title="Editar Ticket">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-outline-primary" 
+                                        onclick="cambiarEstatus({{ ticket.id }})"
+                                        title="Cambiar Estatus">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <a href="{{ url_for('main.descargar_comprobante', ticket_id=ticket.id) }}" 
+                                   class="btn btn-outline-info" title="Descargar PDF">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button class="btn btn-outline-danger" 
+                                        onclick="eliminarTicket({{ ticket.id }})"
+                                        title="Eliminar Ticket">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No se encontraron tickets</h4>
+            <p class="text-muted">
+                {% if query %}
+                    No hay resultados para "{{ query }}". Intenta con otros términos de búsqueda.
+                {% else %}
+                    No hay tickets registrados en el sistema.
+                {% endif %}
+            </p>
+            {% if not query %}
+            <a href="{{ url_for('main.crear_ticket_admin') }}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Crear Primer Ticket
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Información de Acciones -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Información de Acciones</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <span class="btn btn-outline-warning btn-sm disabled">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                        <small class="d-block mt-1">Editar</small>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="btn btn-outline-primary btn-sm disabled">
+                            <i class="fas fa-sync-alt"></i>
+                        </span>
+                        <small class="d-block mt-1">Cambiar Estatus</small>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="btn btn-outline-info btn-sm disabled">
+                            <i class="fas fa-download"></i>
+                        </span>
+                        <small class="d-block mt-1">Descargar PDF</small>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="btn btn-outline-danger btn-sm disabled">
+                            <i class="fas fa-trash"></i>
+                        </span>
+                        <small class="d-block mt-1">Eliminar</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para acciones -->
+<script>
+function cambiarEstatus(ticketId) {
+    if (confirm('¿Estás seguro de cambiar el estatus de este ticket?')) {
+        fetch(`/admin/tickets/${ticketId}/estatus`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Error en la respuesta del servidor');
+            }
+        })
+        .then(data => {
+            if (data.nuevo_estatus) {
+                // Mostrar mensaje de éxito
+                showAlert(`Estatus cambiado a: ${data.nuevo_estatus}`, 'success');
+                // Recargar después de 1 segundo
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                throw new Error('Respuesta inválida del servidor');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al cambiar el estatus', 'error');
+        });
+    }
+}
+
+function eliminarTicket(ticketId) {
+    if (confirm('¿Estás seguro de eliminar este ticket? Esta acción no se puede deshacer.')) {
+        fetch(`/admin/tickets/${ticketId}/eliminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                showAlert('Ticket eliminado exitosamente', 'success');
+                // Recargar después de 1 segundo
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Error al eliminar el ticket');
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert(error.message, 'error');
+        });
+    }
+}
+
+function showAlert(message, type) {
+    // Crear alerta temporal
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insertar al inicio del container
+    const container = document.querySelector('.container.mt-4');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Mejorar la experiencia de búsqueda
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput && searchInput.value) {
+        searchInput.focus();
+        searchInput.select();
+    }
+});
+</script>
+
+<style>
+.table th {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.table td {
+    vertical-align: middle;
+}
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+}
+.badge {
+    font-size: 0.75em;
+}
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+</style>
+{% endblock %}
